@@ -70,10 +70,31 @@ const postRegister = async (req, res) => {
     return res.json({error: 'USER_ALREADY_EXIST'});
   }
 
-  db.query(' INSERT INTO users SET ? ', newUserForm, (err, rows) => {
+  db.query(' INSERT INTO users SET ? ', newUserForm, async (err, rows) => {
     if (err) {
       return res.json({error: err})
     } else {
+      const user = await getUser(newUserForm.username, newUserForm.email);
+
+      const token = jwt.sign({
+          username: user.username,
+          userId: user.id
+        },
+        'kardesim-helikopter-patpat', {
+          expiresIn: '7d'
+        }
+      );
+      db.query(
+        'UPDATE users SET last_login = now() WHERE id = ?',
+        [user.id]
+      );
+      return res.status(200).send({
+        error: false,
+        data: {
+          token,
+          user: user
+        }
+      });
       res.json({error: false});
     }
   });
