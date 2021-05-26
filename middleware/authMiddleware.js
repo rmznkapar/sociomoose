@@ -33,14 +33,16 @@ const validateRegister = (req, res, next) => {
 
 const isLoggedIn = (req, res, next) => {
   try {
-    const token = req.get('Authorization');
+    // const token = req.get('Authorization');
+    const token = req.get('Authorization').split(" ")[1] || req.get('Authorization');
     const decoded = jwt.verify(
       token,
-      'kardesim-helikopter-patpat'
+      process.env.JWT_SECRET
     );
     req.userData = decoded;
     next();
   } catch (err) {
+    console.log(err);
     return res.json({
       error: 'INVALID_SESSION'
     });

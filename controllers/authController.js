@@ -37,7 +37,7 @@ const postLogin = async (req, res) => {
         username: user.username,
         userId: user.id
       },
-      'kardesim-helikopter-patpat', {
+      process.env.JWT_SECRET, {
         expiresIn: '7d'
       }
     );
@@ -80,7 +80,7 @@ const postRegister = async (req, res) => {
           username: user.username,
           userId: user.id
         },
-        'kardesim-helikopter-patpat', {
+        process.env.JWT_SECRET, {
           expiresIn: '7d'
         }
       );
@@ -88,14 +88,13 @@ const postRegister = async (req, res) => {
         'UPDATE users SET last_login = now() WHERE id = ?',
         [user.id]
       );
-      return res.status(200).send({
+      return res.status(200).json({
         error: false,
         data: {
           token,
           user: user
         }
       });
-      res.json({error: false});
     }
   });
 }
