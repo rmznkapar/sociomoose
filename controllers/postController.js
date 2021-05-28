@@ -16,15 +16,17 @@ const uploadPost = (req, res) => {
   const upload = multer({ storage: storage }).single('img_file');
 
   upload(req, res, function(err) {
+
     const uploadForm = {
       user_id: req.userData.userId,
       content: req.body.content,
-      img_name: req.file.filename
     }
 
-    if (!req.file) {
-      return res.json({error: 'IMG_EMPTY'});
+    if (req.file) {
+      uploadForm.img_name = req.file.filename
     }
+
+
     else if (err instanceof multer.MulterError) {
       return res.json({error: 'MULTER'});
     }
@@ -70,7 +72,7 @@ const getAllPosts = (req, res) => {
       ORDER BY posts.date DESC 
       LIMIT ? OFFSET ? ` ,
     [req.userData.userId, req.body.limit, req.body.offset],
-    (err, rows) => {
+    async (err, rows) => {
       if (err) {
         return res.json({
           data: null, 
@@ -91,6 +93,34 @@ const getAllPosts = (req, res) => {
       }
     }
   );
+}
+
+const getSpecPost = (req, res) => {
+  db.query(
+    ` SELECT posts.*, follows.*, users.username, users.id AS user_id 
+      (SELECT COUNT(*) FROM likes WHERE posts.id = likes.post_id) AS like_count,
+      (SELECT COUNT(*) FROM likes WHERE posts.id = likes.post_id AND likes.user_id = ?) AS liked,
+      (SELECT COUNT(*) FROM comments WHERE posts.id = comments.post_id) AS comment_count 
+      FROM posts 
+      INNER JOIN users ON posts.user_id = users.id 
+      LEFT JOIN follows ON users.id = follows.following_id 
+      WHERE follows.follower_id = ? 
+      LIMIT ? OFFSET ? `,
+    [req.userData.userId, req.body.limit, req.body.offset ],
+    async (err, rows) => {
+      if (err) {
+        return res.json({
+          data: null, 
+          error: err
+        })
+      } else {
+        return res.json({
+          error: false,
+          data: rows
+        });
+      }
+    }
+  )
 }
 
 const likePost = (req, res) => {
@@ -142,8 +172,78 @@ const likePost = (req, res) => {
   )
 }
 
+const makeComment = async (req, res) => {
+  const commentForm = {
+    content: req.body.content,
+    post_id: req.body.post_id,
+    user_id: req.userData.userId
+  }
+
+  if (commentForm.content.length < 1) {
+    return res.json({error: 'EMPTY_CONTENT', data: false});
+  }
+
+  db.query(
+    ` INSERT INTO comments SET ? `, 
+    commentForm, 
+    async (err, rows) => {
+      if (err) {
+        return res.json({error: err})
+      } else {
+        return res.json({
+          error: false,
+          data: {
+            post: commentForm
+          }
+        });
+      }
+    }
+  )
+
+}
+
+const getComments = async (req, res) => {
+  db.query(
+    ` SELECT * FROM comments INNER JOIN users ON comments.user_id = users.id WHERE post_id = ? `,
+    [req.body.post_id],
+    async (err, rows) => {
+      if (err) {
+        return res.json({error: err})
+      } else {
+        return res.json({
+          error: false,
+          data: {
+            comments: rows
+          }
+        });
+      }
+    }
+  )
+}
+
+const deletePost = async (req, res) => {
+  db.query(
+    ` DELETE FROM posts WHERE id = ? AND user_id = ? `,
+    [req.body.post_id, req.userData.userId],
+    async (err, rows) => {
+      if (err) {
+        return res.json({error: err})
+      } else {
+        return res.json({
+          error: false,
+          data: true
+        });
+      }
+    }
+  )
+}
+
 module.exports = {
   uploadPost: uploadPost,
   getAllPosts: getAllPosts,
+  getSpecPost: getSpecPost,
   likePost: likePost, 
+  makeComment: makeComment,
+  getComments: getComments,
+  deletePost: deletePost
 };

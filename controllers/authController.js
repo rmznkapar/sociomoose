@@ -119,7 +119,46 @@ const getUser = (username, email) => {
   })
 }
 
+
+const updatePassword = async (req, res) => {
+
+  const passwordForm = {
+    currPass: req.body.curr_pass,
+    newPass: await hashPass(req.body.new_pass)
+  }
+
+  const user = await getUser(req.userData.username, '');
+  if (!user) {
+    return res.json({error: 'USER_DOESNT_EXIST'});
+  }
+  
+  const bResult = await bcrypt.compare(passwordForm.currPass, user.password);
+
+  console.log(passwordForm.newPass, req.userData.userId);
+  if (bResult) {
+    db.query(
+      ` UPDATE users SET password = ? WHERE id = ? `,
+      [passwordForm.newPass, req.userData.userId],
+      async (err, rows) => {
+        if (err) {
+          return res.json({error: err, data: false})
+        } else {
+          return res.json({
+            error: false,
+            data: rows.affectedRows
+          })
+        }
+      }
+    )
+  } else {
+    return res.json({error: 'WRONG_PASS', data: false})
+  }
+
+}
+
 module.exports = {
   postRegister: postRegister,
-  postLogin: postLogin
+  postLogin: postLogin,
+  updatePassword: updatePassword
+
 };

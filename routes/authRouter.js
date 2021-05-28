@@ -8,4 +8,6 @@ router.post('/register', authMiddleware.validateRegister, authController.postReg
 
 router.post('/login', authController.postLogin)
 
+router.post('/updatePassword', authMiddleware.isLoggedIn, authController.updatePassword)
+
 module.exports = router;

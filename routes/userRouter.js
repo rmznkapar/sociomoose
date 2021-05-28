@@ -9,4 +9,10 @@ router.post('/getProfile', authMiddleware.isLoggedIn, userController.getProfile)
 
 router.post('/followUser', authMiddleware.isLoggedIn, userController.followUser)
 
+router.post('/getFollowers', authMiddleware.isLoggedIn, userController.getFollowers)
+
+router.post('/getFollowings', authMiddleware.isLoggedIn, userController.getFollowings)
+
+router.post('/updateBio', authMiddleware.isLoggedIn, userController.updateBio)
+
 module.exports = router;
