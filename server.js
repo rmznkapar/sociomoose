@@ -4,6 +4,14 @@ const bodyParser = require('body-parser');
 const cors = require('cors');
 require('dotenv').config();
 
+app.all('*', (req, res, next) => {
+  var origin = req.get('origin'); 
+  res.header('Access-Control-Allow-Origin', origin);
+  res.header("Access-Control-Allow-Headers", "X-Requested-With");
+  res.header('Access-Control-Allow-Headers', 'Content-Type');
+  next();
+});
+
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(cors());
