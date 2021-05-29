@@ -17,7 +17,7 @@ app.use(bodyParser.urlencoded({ extended: true }));
 app.use(cors());
 app.use(express.static('public'));
 
-const PORT = 8080;
+const PORT = process.env.PORT || 3000;
 
 const authRouter = require('./routes/authRouter.js');
 const postRouter = require('./routes/postRouter.js');
