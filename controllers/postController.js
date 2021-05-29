@@ -97,7 +97,7 @@ const getAllPosts = (req, res) => {
 
 const getSpecPost = (req, res) => {
   db.query(
-    ` SELECT posts.*, follows.*, users.username, users.id AS user_id 
+    ` SELECT posts.*, follows.*, users.username, users.id AS user_id,
       (SELECT COUNT(*) FROM likes WHERE posts.id = likes.post_id) AS like_count,
       (SELECT COUNT(*) FROM likes WHERE posts.id = likes.post_id AND likes.user_id = ?) AS liked,
       (SELECT COUNT(*) FROM comments WHERE posts.id = comments.post_id) AS comment_count 
@@ -106,7 +106,7 @@ const getSpecPost = (req, res) => {
       LEFT JOIN follows ON users.id = follows.following_id 
       WHERE follows.follower_id = ? 
       LIMIT ? OFFSET ? `,
-    [req.userData.userId, req.body.limit, req.body.offset ],
+    [req.userData.userId, req.userData.userId, req.body.limit, req.body.offset],
     async (err, rows) => {
       if (err) {
         return res.json({

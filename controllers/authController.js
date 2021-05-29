@@ -28,6 +28,7 @@ const postLogin = async (req, res) => {
   if (!user) {
     return res.json({error: 'USER_DOESNT_EXIST'});
   }
+  console.log(user);
 
   //sifreyi eslestirir
   const bResult = await bcrypt.compare(userForm.password, user.password);

@@ -5,6 +5,7 @@ const authMiddleware = require('../middleware/authMiddleware');
 const authController = require('../controllers/authController');
 
 router.get('/test', (req, res) => {
+  
   return res.json({error: false});
 })
 
