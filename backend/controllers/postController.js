@@ -203,6 +203,7 @@ const makeComment = async (req, res) => {
 }
 
 const getComments = async (req, res) => {
+  console.log(req.body.post_id);
   db.query(
     ` SELECT * FROM comments INNER JOIN users ON comments.user_id = users.id WHERE post_id = ? `,
     [req.body.post_id],
